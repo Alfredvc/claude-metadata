@@ -211,7 +211,17 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    projects_root = os.path.expanduser("~/.claude/projects")
+    claude_dir = os.path.expanduser("~/.claude")
+    if not os.path.isdir(claude_dir):
+        print(f"Error: Claude directory not found at {claude_dir}", file=sys.stderr)
+        print("Please install Claude Code first: https://claude.ai/download", file=sys.stderr)
+        sys.exit(1)
+
+    projects_root = os.path.join(claude_dir, "projects")
+    if not os.path.isdir(projects_root):
+        print(f"Error: No Claude project data found at {projects_root}", file=sys.stderr)
+        print("Claude Code must be run at least once before usage data is available.", file=sys.stderr)
+        sys.exit(1)
 
     if args.all:
         candidate_dirs = sorted(os.listdir(projects_root))
