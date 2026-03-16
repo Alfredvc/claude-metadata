@@ -1,0 +1,12 @@
+{
+  "name": "claude-api-usage",
+  "version": "1.0.0",
+  "description": "Analyze Claude Code token usage, costs, and conversation workflows",
+  "author": {
+    "name": "alfredvc",
+    "url": "https://github.com/alfredvc"
+  },
+  "repository": "https://github.com/alfredvc/claude-api-usage",
+  "keywords": ["usage", "tokens", "cost", "analytics"],
+  "skills": "./skills/"
+}

@@ -14,4 +14,5 @@ python3 ~/.claude/skills/api-usage/api_usage.py [project_dir]
 
 - If the user doesn't specify a directory, use the current project root.
 - Pass `--no-subdirs` if the user only wants the main project, not worktrees or sub-dirs.
+- Pass `--all` to scan every Claude project at once.
 - Present the output as-is — it's already formatted for the terminal.

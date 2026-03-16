@@ -252,7 +252,11 @@ if __name__ == "__main__":
             print(f"Expected key: {project_key}", file=sys.stderr)
         sys.exit(1)
 
-    files = sorted(f for d in matched_dirs for f in glob.glob(os.path.join(d, "*.jsonl")))
+    files = sorted(
+        f for d in matched_dirs
+        for f in glob.glob(os.path.join(d, "*.jsonl"))
+                 + glob.glob(os.path.join(d, "*/subagents/agent-*.jsonl"))
+    )
 
     # ── Accumulate data in parallel ──────────────────────────────────────────
     # Phase 1: collect per-msg_id best entries across all files.

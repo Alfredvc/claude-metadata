@@ -1,51 +1,55 @@
-# 🧾 claude-api-usage
+# claude-api-usage
 
-## **Curious what your Claude Code usage would cost at API prices?**
+## **Tools for analyzing your Claude Code usage**
 
 ![Example output](docs/output.png)
 
-## ✨ What you get
-
-- 📊 **Per-model breakdown** — input, cache write, cache read, and output tokens
-- 💰 **Cost matrix** across all models and token types
-- ⚡ **Cache efficiency stats** — hit rate and how much caching saved you
-- 📅 **Time summary** with average monthly cost and per-model projections
-- 🗂️ **Multi-project support** — single project, worktrees, or everything at once
-- 🚀 **Parallel processing** for large log sets
-
 ---
 
-## 🔌 Install as a Claude Code skill
+## Install as Claude Code plugin
 
-The fastest way. Adds `/api-usage` as a slash command directly inside Claude Code.
+Requires Claude Code 1.0.33+.
+
+### From marketplace (snapshot)
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/alfredvc/claude-api-usage/main/install.sh | sh
+/plugin install claude-api-usage
 ```
 
-That's it. Now just ask Claude:
+### Local development (live-linked)
 
-```
-/api-usage
-/api-usage /path/to/project
-```
-
----
-
-## 🐍 Use the script directly
-
-Prefer running it yourself? Grab the script:
+Register the repo as a local marketplace, install, then replace the cached copy with a symlink so edits are reflected immediately:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/alfredvc/claude-api-usage/main/skill/api_usage.py -o api_usage.py
+claude plugin marketplace add /path/to/claude-api-usage
+claude plugin install claude-api-usage@claude-api-usage
+
+# Replace the cache copy with a symlink to the source repo
+rm -rf ~/.claude/plugins/cache/claude-api-usage/claude-api-usage/1.0.0
+ln -s /path/to/claude-api-usage ~/.claude/plugins/cache/claude-api-usage/claude-api-usage/1.0.0
 ```
+
+Skills are namespaced under the plugin name:
+- `claude-api-usage:api-usage`
+- `claude-api-usage:extract-conversations`
 
 ---
 
-## 🛠️ Usage
+## Skills
 
-```
-python3 api_usage.py [project_dir] [--no-subdirs] [--all]
+### `api-usage` — Token usage & cost breakdown
+
+Curious what your Claude Code usage would cost at API prices?
+
+- Per-model breakdown — input, cache write, cache read, and output tokens
+- Cost matrix across all models and token types
+- Cache efficiency stats — hit rate and how much caching saved you
+- Time summary with average monthly cost and per-model projections
+- Multi-project support — single project, worktrees, or everything at once
+- Parallel processing for large log sets
+
+```sh
+python3 skills/api-usage/api_usage.py [project_dir] [--no-subdirs] [--all]
 ```
 
 | Argument | Description |
@@ -54,23 +58,48 @@ python3 api_usage.py [project_dir] [--no-subdirs] [--all]
 | `--no-subdirs` | Exclude worktrees and sub-directories from the scan |
 | `--all` | Scan every Claude project — your grand total across everything |
 
+### `extract-conversations` — Conversation data for process analysis
+
+Extract structured conversation data to analyze collaboration patterns, find failure modes, and improve workflows.
+
+Outputs JSON structured as **conversations → sessions → turns**, including:
+- User messages, timestamps, and durations
+- Tool usage counts and skill invocations (CLI vs model-triggered)
+- Token usage per turn and per subagent
+- Interruptions with post-interrupt user text
+- Errors (bash failures, tool errors)
+- Inlined subagent metadata
+- File paths and UUIDs for digging deeper
+
 ```sh
-# Current project
-python3 api_usage.py
+python3 skills/extract-conversations/extract_session_data.py [project_dir] [options]
+```
 
-# Specific project
-python3 api_usage.py ~/src/my-project
+| Argument | Description |
+|---|---|
+| `project_dir` | Path to the project root (default: current directory) |
+| `--no-subdirs` | Exclude worktrees and sub-directories |
+| `--all` | Scan every Claude project |
+| `--from YYYY-MM-DD` | Filter sessions starting from this date |
+| `--to YYYY-MM-DD` | Filter sessions up to this date |
+| `--session ID` | Filter to a specific session |
 
-# Current project only, no worktrees
-python3 api_usage.py --no-subdirs
+**Example: extract and query with jq**
 
-# 👀 See your total Claude spend across ALL projects
-python3 api_usage.py --all
+```sh
+# Extract to file
+python3 skills/extract-conversations/extract_session_data.py ~/src/my-project > /tmp/conversations.json
+
+# Find all interrupted turns
+jq '[.conversations[].sessions[].turns[] | select(.interrupted)]' /tmp/conversations.json
+
+# Skill usage frequency
+jq '[.conversations[].sessions[].turns[].skills[].name] | group_by(.) | map({skill: .[0], count: length}) | sort_by(-.count)' /tmp/conversations.json
 ```
 
 ---
 
-## 📋 Requirements
+## Requirements
 
 - Python 3.10+
-- Claude Code with conversation logs in `~/.claude/projects/`
+- Claude Code 1.0.33+

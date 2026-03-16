@@ -1,0 +1,16 @@
+{
+  "name": "claude-api-usage",
+  "version": "1.0.0",
+  "description": "Claude Code usage analysis and conversation extraction tools",
+  "owner": {
+    "name": "alfredvc",
+    "url": "https://github.com/alfredvc"
+  },
+  "plugins": [
+    {
+      "name": "claude-api-usage",
+      "source": "./",
+      "description": "Analyze Claude Code token usage, costs, and conversation workflows"
+    }
+  ]
+}
