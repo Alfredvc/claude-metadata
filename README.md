@@ -1,5 +1,43 @@
 # claude-meta
 
+> # ⚠️ ARCHIVED — migrate to [`cct`](https://github.com/Alfredvc/cct)
+>
+> **This repo is archived.** Both python scripts have been reimplemented as native subcommands of [`cct`](https://github.com/Alfredvc/cct), backed by a DuckDB ingest of your transcripts so reports return instantly instead of re-parsing JSONL on every run.
+>
+> ### Migration cheat sheet
+>
+> | Old (this repo) | New (`cct`) |
+> |---|---|
+> | `python3 skills/api-usage/scripts/api_usage.py` | `cct report usage` (text) — add `--json` for machine output |
+> | `python3 skills/api-usage/scripts/api_usage.py --all` | `cct report usage --all` |
+> | `python3 skills/api-usage/scripts/api_usage.py --no-subdirs` | `cct report usage --no-subdirs` |
+> | `python3 skills/extract-conversations/scripts/extract_session_data.py` | `cct extract sessions` |
+> | `… --all` / `--no-subdirs` / `--from` / `--to` / `--session` | identical flags on `cct extract sessions` |
+>
+> ### Setup (one time)
+>
+> ```sh
+> # Install cct
+> curl -fsSL https://raw.githubusercontent.com/Alfredvc/cct/main/install.sh | sh
+>
+> # Install duckdb CLI (also needed by the optional Claude skills)
+> curl https://install.duckdb.org | sh
+>
+> cct ingest                # builds ~/.local/share/cct/transcripts.duckdb
+> cct report usage          # was api_usage.py
+> cct extract sessions      # was extract_session_data.py
+> ```
+>
+> Re-run `cct ingest` whenever you want fresh data — it overwrites the DB and is fast (a few seconds for thousands of sessions).
+>
+> ### Notable difference
+>
+> `api_usage.py` applied the Claude long-context 2× input / 1.5× output surcharge that Anthropic [removed on 2026-03-13](https://platform.claude.com/docs/en/about-claude/pricing). `cct report usage` reflects current pricing, so totals will be lower than this repo's script for windows that include >200K-token calls. For historical "what I was actually billed at the time" use the old script; for "what would this cost today" use `cct`.
+>
+> See [`cct`](https://github.com/Alfredvc/cct) for the rest — the local DuckDB is also queryable by Claude itself via the `cct-db` skill.
+>
+> ---
+
 ## Understanding how you interact with Claude — and how Claude performs
 
 This plugin extracts structured data from your Claude Code sessions. It turns raw JSONL logs into queryable interaction data and detailed cost breakdowns — giving you visibility into collaboration patterns, failure modes, token efficiency, and spend.
